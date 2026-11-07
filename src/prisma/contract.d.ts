@@ -23,8 +23,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'0c0734babd6eeb868fee1f281ca96963022475611560e9f170f465daa35f8599'>;
-export type ExecutionHash = ExecutionHashBase<string>;
+  StorageHashBase<'1be15f27bab414bf45aeee210de30a9973d729aacb297b5f45f8abf9fd9a080e'>;
+export type ExecutionHash =
+  ExecutionHashBase<'1400dcb658a657496101a44fc18f584c32c978aeea41200acdc5dfa0d2769139'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -237,7 +238,15 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
   : Encoded;
 type ParameterizedOutputTypeFunctions = PgParameterizedOutputTypes;
 
-type FieldTypeOverrides = {};
+type FieldTypeOverrides = {
+  readonly public: {
+    readonly models: {
+      readonly User: {
+        readonly role: { readonly output: 'USER' | 'ADMIN'; readonly input: 'USER' | 'ADMIN' };
+      };
+    };
+  };
+};
 export type FieldOutputTypes = FieldTypesFromDomain<
   ContractBase['domain']['namespaces'],
   CodecTypes,
@@ -252,7 +261,13 @@ export type FieldInputTypes = FieldTypesFromDomain<
   FieldTypeOverrides,
   'input'
 >;
-type ColumnTypeOverrides = {};
+type ColumnTypeOverrides = {
+  readonly public: {
+    readonly User: {
+      readonly role: { readonly output: 'USER' | 'ADMIN'; readonly input: 'USER' | 'ADMIN' };
+    };
+  };
+};
 export type StorageColumnTypes = ColumnTypesFromStorage<
   ContractBase['storage'],
   CodecTypes,
@@ -268,10 +283,22 @@ export type StorageColumnInputTypes = ColumnTypesFromStorage<
   'input'
 >;
 
-export namespace Models {}
+export namespace Models {
+  export type public_User = {
+    createdAt: FieldOutputTypes['public']['User']['createdAt'];
+    email: FieldOutputTypes['public']['User']['email'];
+    emailVerified: FieldOutputTypes['public']['User']['emailVerified'];
+    id: FieldOutputTypes['public']['User']['id'];
+    role: FieldOutputTypes['public']['User']['role'];
+    updatedAt: FieldOutputTypes['public']['User']['updatedAt'];
+    readonly [RelationKeys]?: never;
+  };
+}
 
 export declare const models: {
-  public: {};
+  public: {
+    User: Models.public_User;
+  };
 };
 
 export type TypeMaps = TypeMapsType<
@@ -290,7 +317,69 @@ type ContractBase = Omit<
       readonly public: {
         readonly id: 'public';
         readonly kind: 'postgres-schema';
-        readonly entries: { readonly table: {} };
+        readonly entries: {
+          readonly table: {
+            readonly User: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
+                readonly email: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly emailVerified: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly role: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'USER'>;
+                  };
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['email'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
+          };
+          readonly valueSet: {
+            readonly Role: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['USER', 'ADMIN'];
+            };
+          };
+        };
       };
     };
     readonly storageHash: StorageHash;
@@ -299,11 +388,76 @@ type ContractBase = Omit<
 > & {
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
-  readonly roots: Record<string, never>;
+  readonly roots: {
+    readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+  };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
-        readonly models: Record<string, never>;
+        readonly models: {
+          readonly User: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly email: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly emailVerified: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly role: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'User';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly email: { readonly column: 'email' };
+                readonly emailVerified: { readonly column: 'emailVerified' };
+                readonly id: { readonly column: 'id' };
+                readonly role: { readonly column: 'role' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+        };
+        readonly enum: {
+          readonly Role: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'USER'; readonly value: 'USER' },
+              { readonly name: 'ADMIN'; readonly value: 'ADMIN' },
+            ];
+          };
+        };
+        readonly enumMemberTypes?: {
+          readonly Role: readonly [
+            { readonly name: 'USER'; readonly value: 'USER' },
+            { readonly name: 'ADMIN'; readonly value: 'ADMIN' },
+          ];
+        };
       };
     };
   };
@@ -335,6 +489,22 @@ type ContractBase = Omit<
     };
   };
   readonly extensions: {};
+  readonly execution: {
+    readonly executionHash: ExecutionHash;
+    readonly mutations: {
+      readonly defaults: readonly [
+        {
+          readonly onCreate: { readonly id: 'instantNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'instantNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'User';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+      ];
+    };
+  };
   readonly meta: {};
 
   readonly profileHash: ProfileHash;
