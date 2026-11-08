@@ -1,7 +1,6 @@
-import {Injectable, NotFoundException, UnauthorizedException} from "@nestjs/common";
+import {Injectable} from "@nestjs/common";
 import type {PrismaService} from "../prisma.service.ts";
 import type {User} from "./interfaces/users.interface.ts";
-import {email} from "alchemy/Cloudflare";
 
 interface UserRow extends User {
     passwordHash: string;

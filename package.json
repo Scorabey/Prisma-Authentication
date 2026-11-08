@@ -40,10 +40,12 @@
   "devDependencies": {
     "@prisma/dev": "0.25.2",
     "@types/node": "^26.6.5",
+    "class-validator": "^0.15.1",
     "prisma": "8.0.0-rc.28",
     "tsdown": "^0.23.1",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "zod": "^4.6.7"
   },
   "overrides": {
     "effect": "4.0.3",
