@@ -1,6 +1,7 @@
 import {Inject, Injectable} from "@nestjs/common";
 import {PrismaService} from "../prisma/prisma.service.ts";
 import type {User} from "./interfaces/users.interface.ts";
+import {id} from "zod/locales";
 
 interface UserRow extends User {
     passwordHash: string;
@@ -11,6 +12,10 @@ export class UsersRepository {
     constructor(
         @Inject(PrismaService) private readonly prismaService: PrismaService
     ) {}
+
+    async findAll(): Promise<User[]> {
+        return await this.prismaService.db.orm.public.User.select(...USER_FIELDS).all().toArray();
+    }
 
     async create(
         email: string,
@@ -67,6 +72,14 @@ export class UsersRepository {
             .select(...USER_FIELDS)
             .where({ id })
             .update({ email: normalize(email) })
+    }
+
+    async markEmailVerified(id: string, email: string): Promise<boolean> {
+        const updated = await this.prismaService.db.orm.public.User
+            .where({ id, email: normalize(email) })
+            .update({ emailVerified: true })
+
+        return updated !== null;
     }
 
     private async findRow(email: string): Promise<User | null> {

@@ -4,14 +4,27 @@ import { PrismaService } from "./prisma/prisma.service.ts";
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import {AuthenticationModule} from "@nestjs/authentication";
+import {FileTemplateEngine, LogMailTransport, MailModule, SmtpTransport} from "@nestjs/mail";
+import "dotenv/config"
+import {join} from "node:path";
 
 @Module({
   imports: [
-      AuthenticationModule.forRoot({
-        session: {
-          absoluteTtl: '14d',
-          idleTtl: '3d',
-        }
+      MailModule.forRootAsync({
+          useFactory: () => ({
+              transport: process.env.SMTP_URL ? new SmtpTransport({ url: process.env.SMTP_URL }) : new LogMailTransport(),
+              templates: new FileTemplateEngine({ dir: join(import.meta.dirname, 'mail/templates') }),
+              from: 'Scorabey <scorabey1@gmail.com>'
+          })
+      }),
+      AuthenticationModule.forRootAsync({
+          useFactory: () => ({
+              session: {
+                  absoluteTtl: '14d',
+                  idleTtl: '3d',
+              },
+              emailVerification: { url: `${process.env.APP_URL}/verify-email` },
+          })
       }),
       UsersModule,
       AuthModule

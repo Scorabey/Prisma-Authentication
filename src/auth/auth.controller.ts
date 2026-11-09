@@ -1,5 +1,5 @@
 import {Body, Controller, HttpCode, HttpStatus, Inject, Post, UnauthorizedException} from "@nestjs/common";
-import {Public, SignInService} from "@nestjs/authentication";
+import {EmailVerificationService, Public, SignInService} from "@nestjs/authentication";
 import {CredentialsService} from "./credentials.service.ts";
 import {signInSchema, type SignUpDto, signUpSchema} from "./dto/auth.schemas.ts";
 import type {SignInDto} from "./dto/auth.dto.ts";
@@ -10,6 +10,7 @@ export class AuthController {
     constructor(
         @Inject(CredentialsService) private readonly credentialsService: CredentialsService,
         @Inject(SignInService) private readonly signInService: SignInService,
+        @Inject(EmailVerificationService) private readonly emailVerificationService: EmailVerificationService
     ) {}
 
     @Post('sign-up')
@@ -17,10 +18,11 @@ export class AuthController {
     async signUp(@Body({ schema: signUpSchema }) body: SignUpDto) {
         const user = await this.credentialsService.register(body.email, body.password);
         await this.signInService.signIn(user.id, { method: "password" });
+        await this.emailVerificationService.send(user)
         return user;
     }
 
-    @Post('sign-up')
+    @Post('sign-in')
     @HttpCode(HttpStatus.OK)
     async signIn(@Body({ schema: signInSchema }) body: SignInDto) {
         const user = await this.credentialsService.verify(body.email, body.password);
