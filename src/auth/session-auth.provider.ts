@@ -1,13 +1,13 @@
-import {Injectable} from "@nestjs/common";
+import {Inject, Injectable} from "@nestjs/common";
 import {AuthenticationRegistry, SessionCookieProvider, type SessionRecord} from "@nestjs/authentication";
 import type {User} from "../users/interfaces/users.interface.ts";
-import type {UsersRepository} from "../users/users.repository.ts";
+import {UsersRepository} from "../users/users.repository.ts";
 
 @Injectable()
 export class SessionAuth extends SessionCookieProvider<User> {
     constructor(
-        private readonly userRepository: UsersRepository,
-        registry: AuthenticationRegistry,
+        @Inject(UsersRepository) private readonly userRepository: UsersRepository,
+        @Inject(AuthenticationRegistry) registry: AuthenticationRegistry,
     ) {
         super();
         registry.registerProvider(this)
