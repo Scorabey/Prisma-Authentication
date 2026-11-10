@@ -23,6 +23,13 @@ import {join} from "node:path";
                   absoluteTtl: '14d',
                   idleTtl: '3d',
               },
+              accessToken: {
+                  key: process.env.JWT_SECRET!,
+                  issuer: "http://localhost:3000",
+                  audience: "mobile-app",
+                  ttl: "15m",
+              },
+              refreshToken: false,
               emailVerification: { url: `${process.env.APP_URL}/verify-email` },
               passwordReset: { url: `${process.env.APP_URL}/reset-password` },
           })

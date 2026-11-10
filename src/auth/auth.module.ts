@@ -7,10 +7,12 @@ import {EmailVerificationMailer} from "./email-verification.mailer.ts";
 import {EmailVerificationController} from "./email-verification.controller.ts";
 import {PasswordResetMailer} from "./password-reset.mailer.ts";
 import {ResetPasswordController} from "./password-reset.controller.ts";
+import {JwtAuth} from "./jwt-auth.provider.ts";
+import {TokensController} from "./tokens.controller.ts";
 
 @Module({
     imports: [UsersModule],
-    controllers: [AuthController, EmailVerificationController, ResetPasswordController],
-    providers: [SessionAuth, CredentialsService, EmailVerificationMailer, PasswordResetMailer]
+    controllers: [AuthController, EmailVerificationController, ResetPasswordController, TokensController],
+    providers: [SessionAuth, CredentialsService, EmailVerificationMailer, PasswordResetMailer, JwtAuth]
 })
 export class AuthModule {}
