@@ -17,3 +17,18 @@ export class SignUpDto {
     @MaxLength(128)
     password: string;
 }
+
+export class EmailDto {
+    @IsEmail()
+    email: string;
+}
+
+export class ResetPasswordDto {
+    @IsString()
+    token: string;
+
+    @IsString()
+    @MinLength(12)
+    @MaxLength(128)
+    password: string;
+}

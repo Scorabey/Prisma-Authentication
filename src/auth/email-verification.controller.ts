@@ -1,11 +1,11 @@
-import {CurrentUser, type EmailVerificationService, Public} from "@nestjs/authentication";
+import {CurrentUser, EmailVerificationService, Public} from "@nestjs/authentication";
 import {
     BadRequestException,
     Body,
     ConflictException,
     Controller,
     HttpCode,
-    HttpStatus,
+    HttpStatus, Inject,
     Post,
     Req
 } from "@nestjs/common";
@@ -13,7 +13,7 @@ import type {User} from "../users/interfaces/users.interface.ts";
 
 @Controller('auth/email')
 export class EmailVerificationController {
-    constructor(private readonly emailVerificationService: EmailVerificationService) {}
+    constructor(@Inject(EmailVerificationService) private readonly emailVerificationService: EmailVerificationService) {}
 
     @Public()
     @Post('verify')

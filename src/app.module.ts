@@ -24,6 +24,7 @@ import {join} from "node:path";
                   idleTtl: '3d',
               },
               emailVerification: { url: `${process.env.APP_URL}/verify-email` },
+              passwordReset: { url: `${process.env.APP_URL}/reset-password` },
           })
       }),
       UsersModule,

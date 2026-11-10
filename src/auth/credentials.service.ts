@@ -19,7 +19,7 @@ export class CredentialsService {
 
     async verify(email: string, password: string): Promise<User | null> {
         const found = await this.userRepository.findCredentials(email);
-        const valid = await this.passwordHasher.verify(email, found?.passwordHash);
+        const valid = await this.passwordHasher.verify(password, found?.passwordHash);
         if (!valid || !found?.passwordHash) {
             return null;
         }
