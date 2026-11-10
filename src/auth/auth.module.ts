@@ -9,10 +9,11 @@ import {PasswordResetMailer} from "./password-reset.mailer.ts";
 import {ResetPasswordController} from "./password-reset.controller.ts";
 import {JwtAuth} from "./jwt-auth.provider.ts";
 import {TokensController} from "./tokens.controller.ts";
+import {MfaController} from "./mfa.controller.ts";
 
 @Module({
     imports: [UsersModule],
-    controllers: [AuthController, EmailVerificationController, ResetPasswordController, TokensController],
+    controllers: [AuthController, EmailVerificationController, ResetPasswordController, TokensController, MfaController],
     providers: [SessionAuth, CredentialsService, EmailVerificationMailer, PasswordResetMailer, JwtAuth]
 })
 export class AuthModule {}

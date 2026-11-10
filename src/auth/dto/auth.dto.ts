@@ -1,4 +1,4 @@
-import {IsEmail, IsString, MaxLength, MinLength} from "class-validator";
+import {IsEmail, IsOptional, IsString, MaxLength, MinLength} from "class-validator";
 
 export class SignInDto {
     @IsEmail()
@@ -31,4 +31,14 @@ export class ResetPasswordDto {
     @MinLength(12)
     @MaxLength(128)
     password: string;
+}
+
+export class TokenRequestDto extends SignInDto {
+    @IsOptional()
+    @IsString()
+    code?:string;
+
+    @IsOptional()
+    @IsString()
+    recoveryCode?:string;
 }

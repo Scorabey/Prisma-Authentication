@@ -29,6 +29,10 @@ import {join} from "node:path";
                   audience: "mobile-app",
                   ttl: "15m",
               },
+              mfa: {
+                issuer: "example.com",
+                encryption: { keys: [process.env.TOTP_ENCRYPTION_KEY!] },
+              },
               refreshToken: false,
               emailVerification: { url: `${process.env.APP_URL}/verify-email` },
               passwordReset: { url: `${process.env.APP_URL}/reset-password` },

@@ -1,7 +1,7 @@
 import {Public, TokenService} from "@nestjs/authentication";
 import {Body, Controller, HttpCode, HttpStatus, Inject, Post, UnauthorizedException} from "@nestjs/common";
 import {CredentialsService} from "./credentials.service.ts";
-import {type SignInDto, signInSchema} from "./dto/auth.schemas.ts";
+import { type TokenRequestDto, tokenRequestSchema} from "./dto/auth.schemas.ts";
 
 @Public()
 @Controller("auth/token")
@@ -13,14 +13,16 @@ export class TokensController {
 
     @Post()
     @HttpCode(HttpStatus.OK)
-    async issue(@Body({ schema: signInSchema }) body: SignInDto) {
+    async issue(@Body({ schema: tokenRequestSchema }) body: TokenRequestDto) {
         const user = await this.credentialsService.verify(body.email, body.password);
         if (!user) {
             throw new UnauthorizedException('Invalid email or password');
         }
+        const { code, recoveryCode } = body;
         return this.tokenService.issue(user.id, {
             method: 'password',
-            claims: { amr: ['pwd'] }
+            claims: { amr: ['pwd'] },
+            secondFactor: { code, recoveryCode }
         })
     }
 
