@@ -19,7 +19,7 @@ export class UsersRepository {
 
     async create(
         email: string,
-        passwordHash: string,
+        passwordHash: string | null,
         { emailVerified = false }: { emailVerified?: boolean } = {},
     ): Promise<User> {
         return await this.prismaService.db.orm.public.User
@@ -46,7 +46,7 @@ export class UsersRepository {
             .first();
     }
 
-    async findCredentials(email: string): Promise<{ user: User, passwordHash: string } | null> {
+    async findCredentials(email: string): Promise<{ user: User, passwordHash: string | null } | null> {
         const result = await this.prismaService.db.orm.public.User
             .select(...USER_FIELDS, "passwordHash")
             .where({ email: normalize(email) })
@@ -80,6 +80,32 @@ export class UsersRepository {
             .update({ emailVerified: true })
 
         return updated !== null;
+    }
+
+    async findByIdentity(provider: string, subject: string): Promise<User | null> {
+        const found = await this.prismaService.db.orm.public.UserIdentity
+            .select("user_id")
+            .where({ provider, subject })
+            .first();
+
+        return found ? this.findById(found.user_id) : null;
+    }
+
+    async linkIdentity(userId: string, provider: string, subject: string): Promise<User | null> {
+         await this.prismaService.db.orm.public.UserIdentity.select(
+            "id",
+            "user_id",
+            "provider",
+            "subject",
+            "createdAt"
+        )
+            .create({
+                id: crypto.randomUUID(),
+                user_id: userId,
+                provider,
+                subject,
+            })
+        return this.findById(userId);
     }
 
     private async findRow(email: string): Promise<User | null> {

@@ -3,7 +3,7 @@ import { AppController } from "./app.controller";
 import { PrismaService } from "./prisma/prisma.service.ts";
 import { UsersModule } from './users/users.module.js';
 import { AuthModule } from './auth/auth.module.js';
-import {AuthenticationModule} from "@nestjs/authentication";
+import {AuthenticationModule, google} from "@nestjs/authentication";
 import {FileTemplateEngine, LogMailTransport, MailModule, SmtpTransport} from "@nestjs/mail";
 import "dotenv/config"
 import {join} from "node:path";
@@ -32,6 +32,15 @@ import {join} from "node:path";
               mfa: {
                 issuer: "example.com",
                 encryption: { keys: [process.env.TOTP_ENCRYPTION_KEY!] },
+              },
+              oidc: {
+                  callbackUrl: `${process.env.APP_URL}/auth/oidc/:provider/callback`,
+                  providers: {
+                      google: google({
+                          clientId: process.env.GOOGLE_CLIENT_ID!,
+                          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+                      }),
+                  },
               },
               refreshToken: false,
               emailVerification: { url: `${process.env.APP_URL}/verify-email` },
