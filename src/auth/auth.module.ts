@@ -12,6 +12,8 @@ import {TokensController} from "./tokens.controller.ts";
 import {MfaController} from "./mfa.controller.ts";
 import {OidcController} from "./oidc.controller.ts";
 import {AccountLinker} from "./account-linker.ts";
+import {MagicLinkMailer} from "./magic-link.mailer.ts";
+import {MagicLinkController} from "./magic-link.controller.ts";
 
 @Module({
     imports: [UsersModule],
@@ -21,7 +23,8 @@ import {AccountLinker} from "./account-linker.ts";
         ResetPasswordController,
         TokensController,
         MfaController,
-        OidcController
+        OidcController,
+        MagicLinkController
     ],
     providers: [
         SessionAuth,
@@ -29,7 +32,8 @@ import {AccountLinker} from "./account-linker.ts";
         EmailVerificationMailer,
         PasswordResetMailer,
         JwtAuth,
-        AccountLinker
+        AccountLinker,
+        MagicLinkMailer
     ]
 })
 export class AuthModule {}

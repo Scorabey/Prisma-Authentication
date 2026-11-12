@@ -45,6 +45,7 @@ import {join} from "node:path";
               refreshToken: false,
               emailVerification: { url: `${process.env.APP_URL}/verify-email` },
               passwordReset: { url: `${process.env.APP_URL}/reset-password` },
+              magicLink: { url: `${process.env.APP_URL}/sign-in/magic` },
           })
       }),
       UsersModule,
