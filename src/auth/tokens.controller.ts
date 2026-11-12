@@ -31,4 +31,10 @@ export class TokensController {
     refresh(@Body('refreshToken') refreshToken: string) {
         return this.tokenService.refresh(refreshToken);
     }
+
+    @Post('revoke')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async revoke(@Body('refreshToken') refreshToken: string) {
+        await this.tokenService.revoke(refreshToken);
+    }
 }

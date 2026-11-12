@@ -22,6 +22,7 @@ import {join} from "node:path";
               session: {
                   absoluteTtl: '14d',
                   idleTtl: '3d',
+                  metadata: (request) => ({ userAgent: request.headers['user-agent'] }),
               },
               accessToken: {
                   key: process.env.JWT_SECRET!,

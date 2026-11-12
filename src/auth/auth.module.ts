@@ -14,6 +14,7 @@ import {OidcController} from "./oidc.controller.ts";
 import {AccountLinker} from "./account-linker.ts";
 import {MagicLinkMailer} from "./magic-link.mailer.ts";
 import {MagicLinkController} from "./magic-link.controller.ts";
+import {SessionsController} from "./sessions.controller.ts";
 
 @Module({
     imports: [UsersModule],
@@ -24,7 +25,8 @@ import {MagicLinkController} from "./magic-link.controller.ts";
         TokensController,
         MfaController,
         OidcController,
-        MagicLinkController
+        MagicLinkController,
+        SessionsController
     ],
     providers: [
         SessionAuth,
