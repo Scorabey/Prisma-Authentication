@@ -1,0 +1,1394 @@
+[
+  {
+    "id": "dropDefault.User.id",
+    "label": "Drop default on \"User\".\"id\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "id",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"id\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop default on \"id\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"id\" DROP DEFAULT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"id\" has no default",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.email_tokens",
+    "label": "Create table \"email_tokens\"",
+    "summary": "Creates table \"email_tokens\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "email_tokens"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"email_tokens\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"email_tokens\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"email_tokens\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"email_tokens\"",
+        "sql": "CREATE TABLE \"public\".\"email_tokens\" (\n  \"created_at\" timestamptz(6) NOT NULL,\n  \"email\" text NOT NULL,\n  \"expires_at\" timestamptz(6) NOT NULL,\n  \"fingerprint\" text,\n  \"id\" text NOT NULL,\n  \"purpose\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"email_tokens_purpose_check_15049ca8\" CHECK (\"purpose\" IN ('password-reset', 'email-verification'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"email_tokens\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"email_tokens\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"email_tokens\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.magic_links",
+    "label": "Create table \"magic_links\"",
+    "summary": "Creates table \"magic_links\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "magic_links"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"magic_links\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"magic_links\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"magic_links\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"magic_links\"",
+        "sql": "CREATE TABLE \"public\".\"magic_links\" (\n  \"created_at\" timestamptz(6) NOT NULL,\n  \"email\" text NOT NULL,\n  \"expires_at\" timestamptz(6) NOT NULL,\n  \"id\" text NOT NULL,\n  \"redirect_to\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"magic_links\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"magic_links\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"magic_links\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.mfa_authenticators",
+    "label": "Create table \"mfa_authenticators\"",
+    "summary": "Creates table \"mfa_authenticators\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "mfa_authenticators"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"mfa_authenticators\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_authenticators\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"mfa_authenticators\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"mfa_authenticators\"",
+        "sql": "CREATE TABLE \"public\".\"mfa_authenticators\" (\n  \"confirmed\" bool NOT NULL,\n  \"last_used_step\" int4,\n  \"pending_secret\" text,\n  \"secret\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"user_id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"mfa_authenticators\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_authenticators\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"mfa_authenticators\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.mfa_failures",
+    "label": "Create table \"mfa_failures\"",
+    "summary": "Creates table \"mfa_failures\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "mfa_failures"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"mfa_failures\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_failures\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"mfa_failures\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"mfa_failures\"",
+        "sql": "CREATE TABLE \"public\".\"mfa_failures\" (\n  \"failed_at\" timestamptz(6) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"mfa_failures\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_failures\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"mfa_failures\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.mfa_recovery_codes",
+    "label": "Create table \"mfa_recovery_codes\"",
+    "summary": "Creates table \"mfa_recovery_codes\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "mfa_recovery_codes"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"mfa_recovery_codes\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_recovery_codes\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"mfa_recovery_codes\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"mfa_recovery_codes\"",
+        "sql": "CREATE TABLE \"public\".\"mfa_recovery_codes\" (\n  \"code_hash\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"user_id\", \"code_hash\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"mfa_recovery_codes\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_recovery_codes\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"mfa_recovery_codes\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.oidc_logins",
+    "label": "Create table \"oidc_logins\"",
+    "summary": "Creates table \"oidc_logins\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "oidc_logins"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"oidc_logins\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"oidc_logins\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"oidc_logins\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"oidc_logins\"",
+        "sql": "CREATE TABLE \"public\".\"oidc_logins\" (\n  \"code_verifier\" text NOT NULL,\n  \"created_at\" timestamptz(6) NOT NULL,\n  \"expires_at\" timestamptz(6) NOT NULL,\n  \"link_session_id\" text,\n  \"link_user_id\" text,\n  \"nonce\" text,\n  \"provider\" text NOT NULL,\n  \"redirect_to\" text,\n  \"state\" text NOT NULL,\n  PRIMARY KEY (\"state\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"oidc_logins\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"oidc_logins\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"oidc_logins\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.refresh_tokens",
+    "label": "Create table \"refresh_tokens\"",
+    "summary": "Creates table \"refresh_tokens\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "refresh_tokens"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"refresh_tokens\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"refresh_tokens\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"refresh_tokens\"",
+        "sql": "CREATE TABLE \"public\".\"refresh_tokens\" (\n  \"claims\" jsonb,\n  \"created_at\" timestamptz(6) NOT NULL,\n  \"expires_at\" timestamptz(6) NOT NULL,\n  \"family_expires_at\" timestamptz(6) NOT NULL,\n  \"family_id\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"revoked\" bool DEFAULT false NOT NULL,\n  \"used_at\" timestamptz(6),\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"refresh_tokens\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"refresh_tokens\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.sessions",
+    "label": "Create table \"sessions\"",
+    "summary": "Creates table \"sessions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "sessions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"sessions\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sessions\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"sessions\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"sessions\"",
+        "sql": "CREATE TABLE \"public\".\"sessions\" (\n  \"created_at\" timestamptz(6) NOT NULL,\n  \"expires_at\" timestamptz(6) NOT NULL,\n  \"id\" text NOT NULL,\n  \"last_active_at\" timestamptz(6) NOT NULL,\n  \"metadata\" jsonb,\n  \"mfa\" text,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"sessions_mfa_check_5d9599e1\" CHECK (\"mfa\" IN ('pending', 'verified'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"sessions\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"sessions\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"sessions\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.user_identities",
+    "label": "Create table \"user_identities\"",
+    "summary": "Creates table \"user_identities\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "user_identities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"user_identities\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user_identities\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"user_identities\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"user_identities\"",
+        "sql": "CREATE TABLE \"public\".\"user_identities\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"provider\" text NOT NULL,\n  \"subject\" text NOT NULL,\n  \"user_id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"user_identities\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"user_identities\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"user_identities\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "setDefault.User.emailVerified",
+    "label": "Set default on \"User\".\"emailVerified\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "emailVerified",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"emailVerified\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "emailVerified"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"emailVerified\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "set default on \"emailVerified\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"emailVerified\" SET DEFAULT false"
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "alterType.User.id",
+    "label": "Alter type of \"User\".\"id\" to text",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "id",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"id\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"id\" to text",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"id\" TYPE text USING \"id\"::text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"id\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id",
+          "text"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterNullability.dropNotNull.User.passwordHash",
+    "label": "Drop NOT NULL on \"User\".\"passwordHash\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "passwordHash",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"passwordHash\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordHash"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"passwordHash\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop NOT NULL on \"passwordHash\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"passwordHash\" DROP NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"passwordHash\" is nullable",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordHash",
+          "YES"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user_identities.user_identities_provider_key",
+    "label": "Add unique constraint on \"user_identities\" (provider)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_identities_provider_key",
+        "table": "user_identities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_identities_provider_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_identities_provider_key",
+          "public",
+          "\"public\".\"user_identities\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"user_identities_provider_key\" on \"user_identities\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_identities_provider_key\"",
+        "sql": "ALTER TABLE \"public\".\"user_identities\" ADD CONSTRAINT \"user_identities_provider_key\" UNIQUE (\"provider\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"user_identities_provider_key\" exists on (provider)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "user_identities_provider_key",
+          "public",
+          "\"public\".\"user_identities\"",
+          "u",
+          "[\"provider\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user_identities.user_identities_subject_key",
+    "label": "Add unique constraint on \"user_identities\" (subject)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_identities_subject_key",
+        "table": "user_identities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_identities_subject_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_identities_subject_key",
+          "public",
+          "\"public\".\"user_identities\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"user_identities_subject_key\" on \"user_identities\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_identities_subject_key\"",
+        "sql": "ALTER TABLE \"public\".\"user_identities\" ADD CONSTRAINT \"user_identities_subject_key\" UNIQUE (\"subject\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"user_identities_subject_key\" exists on (subject)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "user_identities_subject_key",
+          "public",
+          "\"public\".\"user_identities\"",
+          "u",
+          "[\"subject\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user_identities.user_identities_provider_subject_key",
+    "label": "Add unique constraint on \"user_identities\" (provider, subject)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_identities_provider_subject_key",
+        "table": "user_identities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_identities_provider_subject_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_identities_provider_subject_key",
+          "public",
+          "\"public\".\"user_identities\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"user_identities_provider_subject_key\" on \"user_identities\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_identities_provider_subject_key\"",
+        "sql": "ALTER TABLE \"public\".\"user_identities\" ADD CONSTRAINT \"user_identities_provider_subject_key\" UNIQUE (\"provider\", \"subject\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"user_identities_provider_subject_key\" exists on (provider, subject)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "user_identities_provider_subject_key",
+          "public",
+          "\"public\".\"user_identities\"",
+          "u",
+          "[\"provider\",\"subject\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.email_tokens.email_tokens_expires_at_idx",
+    "label": "Create index \"email_tokens_expires_at_idx\" on \"email_tokens\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "email_tokens_expires_at_idx",
+        "table": "email_tokens"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"email_tokens_expires_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"email_tokens_expires_at_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"email_tokens_expires_at_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"email_tokens_expires_at_idx\"",
+        "sql": "CREATE INDEX \"email_tokens_expires_at_idx\" ON \"public\".\"email_tokens\" (\"expires_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"email_tokens_expires_at_idx\" exists on \"email_tokens\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"email_tokens_expires_at_idx\"",
+          "i",
+          "I",
+          "\"public\".\"email_tokens\"",
+          "btree",
+          "[\"expires_at\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.email_tokens.email_tokens_user_id_purpose_idx",
+    "label": "Create index \"email_tokens_user_id_purpose_idx\" on \"email_tokens\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "email_tokens_user_id_purpose_idx",
+        "table": "email_tokens"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"email_tokens_user_id_purpose_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"email_tokens_user_id_purpose_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"email_tokens_user_id_purpose_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"email_tokens_user_id_purpose_idx\"",
+        "sql": "CREATE INDEX \"email_tokens_user_id_purpose_idx\" ON \"public\".\"email_tokens\" (\"user_id\", \"purpose\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"email_tokens_user_id_purpose_idx\" exists on \"email_tokens\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"email_tokens_user_id_purpose_idx\"",
+          "i",
+          "I",
+          "\"public\".\"email_tokens\"",
+          "btree",
+          "[\"user_id\",\"purpose\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.magic_links.magic_links_expires_at_idx",
+    "label": "Create index \"magic_links_expires_at_idx\" on \"magic_links\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "magic_links_expires_at_idx",
+        "table": "magic_links"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"magic_links_expires_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"magic_links_expires_at_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"magic_links_expires_at_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"magic_links_expires_at_idx\"",
+        "sql": "CREATE INDEX \"magic_links_expires_at_idx\" ON \"public\".\"magic_links\" (\"expires_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"magic_links_expires_at_idx\" exists on \"magic_links\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"magic_links_expires_at_idx\"",
+          "i",
+          "I",
+          "\"public\".\"magic_links\"",
+          "btree",
+          "[\"expires_at\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.mfa_failures.mfa_failures_failed_at_idx",
+    "label": "Create index \"mfa_failures_failed_at_idx\" on \"mfa_failures\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "mfa_failures_failed_at_idx",
+        "table": "mfa_failures"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"mfa_failures_failed_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_failures_failed_at_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"mfa_failures_failed_at_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"mfa_failures_failed_at_idx\"",
+        "sql": "CREATE INDEX \"mfa_failures_failed_at_idx\" ON \"public\".\"mfa_failures\" (\"failed_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"mfa_failures_failed_at_idx\" exists on \"mfa_failures\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_failures_failed_at_idx\"",
+          "i",
+          "I",
+          "\"public\".\"mfa_failures\"",
+          "btree",
+          "[\"failed_at\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.mfa_failures.mfa_failures_user_id_failed_at_idx",
+    "label": "Create index \"mfa_failures_user_id_failed_at_idx\" on \"mfa_failures\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "mfa_failures_user_id_failed_at_idx",
+        "table": "mfa_failures"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"mfa_failures_user_id_failed_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_failures_user_id_failed_at_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"mfa_failures_user_id_failed_at_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"mfa_failures_user_id_failed_at_idx\"",
+        "sql": "CREATE INDEX \"mfa_failures_user_id_failed_at_idx\" ON \"public\".\"mfa_failures\" (\"user_id\", \"failed_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"mfa_failures_user_id_failed_at_idx\" exists on \"mfa_failures\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"mfa_failures_user_id_failed_at_idx\"",
+          "i",
+          "I",
+          "\"public\".\"mfa_failures\"",
+          "btree",
+          "[\"user_id\",\"failed_at\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.oidc_logins.oidc_logins_expires_at_idx",
+    "label": "Create index \"oidc_logins_expires_at_idx\" on \"oidc_logins\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "oidc_logins_expires_at_idx",
+        "table": "oidc_logins"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"oidc_logins_expires_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"oidc_logins_expires_at_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"oidc_logins_expires_at_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"oidc_logins_expires_at_idx\"",
+        "sql": "CREATE INDEX \"oidc_logins_expires_at_idx\" ON \"public\".\"oidc_logins\" (\"expires_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"oidc_logins_expires_at_idx\" exists on \"oidc_logins\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"oidc_logins_expires_at_idx\"",
+          "i",
+          "I",
+          "\"public\".\"oidc_logins\"",
+          "btree",
+          "[\"expires_at\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.refresh_tokens.refresh_tokens_family_expires_at_idx",
+    "label": "Create index \"refresh_tokens_family_expires_at_idx\" on \"refresh_tokens\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "refresh_tokens_family_expires_at_idx",
+        "table": "refresh_tokens"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"refresh_tokens_family_expires_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens_family_expires_at_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"refresh_tokens_family_expires_at_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"refresh_tokens_family_expires_at_idx\"",
+        "sql": "CREATE INDEX \"refresh_tokens_family_expires_at_idx\" ON \"public\".\"refresh_tokens\" (\"family_expires_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"refresh_tokens_family_expires_at_idx\" exists on \"refresh_tokens\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens_family_expires_at_idx\"",
+          "i",
+          "I",
+          "\"public\".\"refresh_tokens\"",
+          "btree",
+          "[\"family_expires_at\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.refresh_tokens.refresh_tokens_family_id_idx",
+    "label": "Create index \"refresh_tokens_family_id_idx\" on \"refresh_tokens\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "refresh_tokens_family_id_idx",
+        "table": "refresh_tokens"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"refresh_tokens_family_id_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens_family_id_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"refresh_tokens_family_id_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"refresh_tokens_family_id_idx\"",
+        "sql": "CREATE INDEX \"refresh_tokens_family_id_idx\" ON \"public\".\"refresh_tokens\" (\"family_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"refresh_tokens_family_id_idx\" exists on \"refresh_tokens\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens_family_id_idx\"",
+          "i",
+          "I",
+          "\"public\".\"refresh_tokens\"",
+          "btree",
+          "[\"family_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.refresh_tokens.refresh_tokens_user_id_idx",
+    "label": "Create index \"refresh_tokens_user_id_idx\" on \"refresh_tokens\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "refresh_tokens_user_id_idx",
+        "table": "refresh_tokens"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"refresh_tokens_user_id_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens_user_id_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"refresh_tokens_user_id_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"refresh_tokens_user_id_idx\"",
+        "sql": "CREATE INDEX \"refresh_tokens_user_id_idx\" ON \"public\".\"refresh_tokens\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"refresh_tokens_user_id_idx\" exists on \"refresh_tokens\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"refresh_tokens_user_id_idx\"",
+          "i",
+          "I",
+          "\"public\".\"refresh_tokens\"",
+          "btree",
+          "[\"user_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.sessions.sessions_expires_at_idx",
+    "label": "Create index \"sessions_expires_at_idx\" on \"sessions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "sessions_expires_at_idx",
+        "table": "sessions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"sessions_expires_at_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sessions_expires_at_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"sessions_expires_at_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"sessions_expires_at_idx\"",
+        "sql": "CREATE INDEX \"sessions_expires_at_idx\" ON \"public\".\"sessions\" (\"expires_at\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"sessions_expires_at_idx\" exists on \"sessions\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"sessions_expires_at_idx\"",
+          "i",
+          "I",
+          "\"public\".\"sessions\"",
+          "btree",
+          "[\"expires_at\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.sessions.sessions_user_id_idx",
+    "label": "Create index \"sessions_user_id_idx\" on \"sessions\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "sessions_user_id_idx",
+        "table": "sessions"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"sessions_user_id_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sessions_user_id_idx\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"sessions_user_id_idx\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"sessions_user_id_idx\"",
+        "sql": "CREATE INDEX \"sessions_user_id_idx\" ON \"public\".\"sessions\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"sessions_user_id_idx\" exists on \"sessions\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"sessions_user_id_idx\"",
+          "i",
+          "I",
+          "\"public\".\"sessions\"",
+          "btree",
+          "[\"user_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.user_identities.user_identities_user_id_idx_6c952402",
+    "label": "Create index \"user_identities_user_id_idx_6c952402\" on \"user_identities\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "user_identities_user_id_idx_6c952402",
+        "table": "user_identities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"user_identities_user_id_idx_6c952402\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user_identities_user_id_idx_6c952402\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"user_identities_user_id_idx_6c952402\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"user_identities_user_id_idx_6c952402\"",
+        "sql": "CREATE INDEX \"user_identities_user_id_idx_6c952402\" ON \"public\".\"user_identities\" (\"user_id\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"user_identities_user_id_idx_6c952402\" exists on \"user_identities\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"user_identities_user_id_idx_6c952402\"",
+          "i",
+          "I",
+          "\"public\".\"user_identities\"",
+          "btree",
+          "[\"user_id\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.user_identities.user_identities_user_id_fkey",
+    "label": "Add foreign key \"user_identities_user_id_fkey\" on \"user_identities\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "user_identities_user_id_fkey",
+        "table": "user_identities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"user_identities_user_id_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_identities_user_id_fkey",
+          "public",
+          "\"public\".\"user_identities\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"user_identities_user_id_fkey\" on \"user_identities\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"user_identities_user_id_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"user_identities\"\nADD CONSTRAINT \"user_identities_user_id_fkey\"\nFOREIGN KEY (\"user_id\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"user_identities_user_id_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "user_identities_user_id_fkey",
+          "public",
+          "\"public\".\"user_identities\"",
+          "f",
+          "[\"user_id\"]",
+          "\"public\".\"User\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  }
+]
