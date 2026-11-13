@@ -2,6 +2,7 @@ import {Public, TokenService} from "@nestjs/authentication";
 import {Body, Controller, HttpCode, HttpStatus, Inject, Post, UnauthorizedException} from "@nestjs/common";
 import {CredentialsService} from "./credentials.service.ts";
 import { type TokenRequestDto, tokenRequestSchema} from "./dto/auth.schemas.ts";
+import {minutes, Throttle} from "@nestjs/throttler";
 
 @Public()
 @Controller("auth/token")
@@ -11,6 +12,10 @@ export class TokensController {
         @Inject(TokenService) private readonly tokenService: TokenService
     ) {}
 
+    @Throttle({
+        default: { limit: 30, ttl: minutes(15) },
+        account: { limit: 5, ttl: minutes(15) },
+    })
     @Post()
     @HttpCode(HttpStatus.OK)
     async issue(@Body({ schema: tokenRequestSchema }) body: TokenRequestDto) {

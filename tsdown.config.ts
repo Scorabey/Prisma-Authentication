@@ -26,4 +26,7 @@ export default defineConfig({
       !optionalNestDependencies.some((pattern) => pattern.test(id)),
     neverBundle: optionalNestDependencies,
   },
+  copy: [
+    { from: "src/mail/templates", to: "dist/mail/" },
+  ]
 });

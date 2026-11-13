@@ -17,7 +17,7 @@
     "strictPropertyInitialization": false,
     "types": [
       "node"
-    ]
+    ],
   },
   "include": ["src/**/*.ts", "*/*.ts"]
 }

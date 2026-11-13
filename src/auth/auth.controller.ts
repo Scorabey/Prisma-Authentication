@@ -3,6 +3,7 @@ import {EmailVerificationService, Public, SignInService} from "@nestjs/authentic
 import {CredentialsService} from "./credentials.service.ts";
 import {signInSchema, type SignUpDto, signUpSchema} from "./dto/auth.schemas.ts";
 import type {SignInDto} from "./dto/auth.dto.ts";
+import {hours, minutes, SkipThrottle, Throttle} from "@nestjs/throttler";
 
 @Public()
 @Controller("auth")
@@ -13,6 +14,8 @@ export class AuthController {
         @Inject(EmailVerificationService) private readonly emailVerificationService: EmailVerificationService
     ) {}
 
+    @SkipThrottle({ account: true })
+    @Throttle({ default: { limit: 10, ttl: hours(1) } })
     @Post('sign-up')
     @HttpCode(HttpStatus.CREATED)
     async signUp(@Body({ schema: signUpSchema }) body: SignUpDto) {
@@ -22,6 +25,10 @@ export class AuthController {
         return user;
     }
 
+    @Throttle({
+        default: { limit: 30, ttl: minutes(15) },
+        account: { limit: 5, ttl: minutes(15) },
+    })
     @Post('sign-in')
     @HttpCode(HttpStatus.OK)
     async signIn(@Body({ schema: signInSchema }) body: SignInDto) {
