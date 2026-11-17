@@ -15,9 +15,11 @@ import {AccountLinker} from "./account-linker.ts";
 import {MagicLinkMailer} from "./magic-link.mailer.ts";
 import {MagicLinkController} from "./magic-link.controller.ts";
 import {SessionsController} from "./sessions.controller.ts";
+import {PrismaAuthStore} from "./prisma-auth.store.ts"
+import { PrismaModule } from '../prisma/prisma.module.ts';
 
 @Module({
-    imports: [UsersModule],
+    imports: [UsersModule, PrismaModule],
     controllers: [
         AuthController,
         EmailVerificationController,
@@ -35,7 +37,8 @@ import {SessionsController} from "./sessions.controller.ts";
         PasswordResetMailer,
         JwtAuth,
         AccountLinker,
-        MagicLinkMailer
+        MagicLinkMailer,
+        PrismaAuthStore
     ]
 })
 export class AuthModule {}

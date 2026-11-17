@@ -84,24 +84,24 @@ export class UsersRepository {
 
     async findByIdentity(provider: string, subject: string): Promise<User | null> {
         const found = await this.prismaService.db.orm.public.UserIdentity
-            .select("user_id")
+            .select("userId")
             .where({ provider, subject })
             .first();
 
-        return found ? this.findById(found.user_id) : null;
+        return found ? this.findById(found.userId) : null;
     }
 
     async linkIdentity(userId: string, provider: string, subject: string): Promise<User | null> {
          await this.prismaService.db.orm.public.UserIdentity.select(
             "id",
-            "user_id",
+            "userId",
             "provider",
             "subject",
             "createdAt"
         )
             .create({
                 id: crypto.randomUUID(),
-                user_id: userId,
+                userId: userId,
                 provider,
                 subject,
             })
